@@ -28,8 +28,7 @@ class BoundaryCond:
 
     def to_xml(self) -> str:
         elem = "<BoundaryCond "
-        for dim in ["xmin", "xmax", "ymin", "ymax", "zmin", "zmax"]:
-            value = getattr(self, dim)
+        for dim, value in self.__dict__.items():
             elem += f'{dim}="{value}" '
         elem += "/>"
         return elem
@@ -68,6 +67,7 @@ class ContinousStructure:
     background_material: Material = field(
         default_factory=lambda: Material("BackgroundMaterial", 1.0, 1.0)
     )
+    # TODO: add parameters settings for the structure
 
     def __post_init__(self):
         for axe in ["x", "y", "z"]:
