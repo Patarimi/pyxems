@@ -27,6 +27,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Run Ty
         run: |
+            uv sync --all-extras
             uvx ty check
 
   doc-build:
