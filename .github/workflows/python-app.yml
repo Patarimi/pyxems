@@ -37,7 +37,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
-    needs: [check-format, doc-build]
+    needs: [check-format]
 
     steps:
     - uses: actions/checkout@v6
