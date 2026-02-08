@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal
+from typing import Literal, get_args
 from dataclasses import dataclass, field
 
 Boundary = Literal["MUR", "PEC", "PMC", "PML"]
@@ -48,9 +48,12 @@ class FDTDConfig:
         return xml
 
 
+Axes = Literal["X", "Y", "Z"]
+
+
 @dataclass(frozen=True)
 class Line:
-    axe: Literal["X", "Y", "Z"]
+    axe: Axes
     position: list[float] = field(default_factory=list)
 
     def to_xml(self) -> str:
@@ -63,17 +66,17 @@ class Line:
 @dataclass(frozen=True)
 class ContinousStructure:
     coordinates_system: int = 0
-    lines: dict[str, Line] = field(default_factory=dict)
+    lines: dict[Axes, Line] = field(default_factory=dict)
     background_material: Material = field(
         default_factory=lambda: Material("BackgroundMaterial", 1.0, 1.0)
     )
     # TODO: add parameters settings for the structure
 
     def __post_init__(self):
-        for axe in ["x", "y", "z"]:
+        for axe in get_args(Axes):
             self.lines[axe] = Line(axe.upper())
 
-    def add_line(self, axe: Literal["x", "y", "z"], position: float):
+    def add_line(self, axe: Axes, position: float):
         self.lines[axe].position.append(position)
 
     def to_xml(self) -> str:
@@ -100,7 +103,7 @@ class PyXEMSConfig:
         return xml
 
 
-def write_openEMS_xml(filename: Path | str, config: FDTDConfig):
+def write_openEMS_xml(filename: Path | str, config: PyXEMSConfig):
     with open(filename, "w") as f:
         f.write('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>\n')
         f.write(config.to_xml())
