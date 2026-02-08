@@ -19,6 +19,12 @@ simulate = [
 requires = ["uv_build>=0.9.15,<0.10.0"]
 build-backend = "uv_build"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+log_cli_level = "ERROR"
+log_file_level = "INFO"
+log_file = "./pytest.log"
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
