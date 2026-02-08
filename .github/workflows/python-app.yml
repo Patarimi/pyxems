@@ -58,7 +58,7 @@ jobs:
         uv sync --group dev
     - name: Test with Pytest
       run: |
-        uv run pytest -rxXs
+        uv run pytest -rxXs --basetemp=tmp 
     - name: Store reports
       if: failure()
       uses: actions/upload-artifact@v6
@@ -67,4 +67,3 @@ jobs:
         path: |
           tmp/
           pytest.log
-          .coverage
