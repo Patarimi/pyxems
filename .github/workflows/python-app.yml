@@ -58,7 +58,7 @@ jobs:
     - name: Install Dependencies
       run: |
         uv tree
-        uv sync --group dev
+        uv sync --group dev --all-extras
     - name: Test with Pytest
       run: |
         uv run pytest -rxXs --basetemp=tmp 
