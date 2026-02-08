@@ -19,7 +19,7 @@ app = cyclopts.App(__name__)
 
 def find_openems_executable() -> Optional[Path]:
     if which("openEMS") is not None:
-        return Path(which("openEMS"))
+        return Path(which("openEMS"))  # type: ignore
     load_dotenv()
     if "OPENEMS_PATH" in os.environ:
         openems_path = Path(os.environ["OPENEMS_PATH"]) / "openEMS"

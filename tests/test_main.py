@@ -186,7 +186,6 @@ def test_generate_simp_patch(tmp_path: Path):
         "gnd",
         Color(214, 174, 82),
         Color(214, 174, 82),
-        eps=1.0,
     )
     oems_config.csx.add_box(
         start=(-30, -30, 0),

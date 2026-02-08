@@ -20,9 +20,11 @@ class Line:
 class Physical:
     value: tuple[float, float, float]
 
-    def __post_init__(self):
-        if isinstance(self.value, float):
-            self.value = (self.value, 1.0, 1.0)
+    def __init__(self, value: float | int | tuple[float, float, float]):
+        if isinstance(value, float) or isinstance(value, int):
+            self.value = (value, 1.0, 1.0)
+        else:
+            self.value = value
 
     def __str__(self, short=True) -> str:
         if short:
@@ -39,16 +41,6 @@ class Material:
     kappa: Physical = field(default_factory=lambda: Physical((0, 0, 0)))
     sigma: Physical = field(default_factory=lambda: Physical((0, 0, 0)))
     density: float = 0.0
-
-    def __post_init__(self):
-        if isinstance(self.epsilon_r, float):
-            self.epsilon_r = Physical(self.epsilon_r)
-        if isinstance(self.mu_r, float):
-            self.mu_r = Physical(self.mu_r)
-        if isinstance(self.kappa, float):
-            self.kappa = Physical((self.kappa, 0, 0))
-        if isinstance(self.sigma, float):
-            self.sigma = Physical((self.sigma, 0, 0))
 
     def to_xml(self, short=True) -> str:
         if short:
@@ -68,7 +60,6 @@ class Color:
         return f'R="{self.r}" G="{self.g}" B="{self.b}" a="{self.a}"'
 
 
-@dataclass(frozen=True)
 class Primitive(Protocol):
     def to_xml(self) -> str: ...
 
@@ -97,14 +88,16 @@ class Property:
     kind: Literal["Metal", "Material"] = "Material"
     fillcolor: Color = field(default_factory=lambda: Color(255, 255, 255, 255))
     edgecolor: Color = field(default_factory=lambda: Color(0, 0, 0, 255))
-    material: Material = field(default_factory=lambda: Material("Property", 1.0, 1.0))
+    material: Material = field(
+        default_factory=lambda: Material("Property", Physical(1.0), Physical(1.0))
+    )
     weight: Material = field(
         default_factory=lambda: Material(
             "Weight",
-            1.0,
-            1.0,
-            Physical([1.0, 1.0, 1.0]),
-            Physical([1.0, 1.0, 1.0]),
+            Physical(1.0),
+            Physical(1.0),
+            Physical((1.0, 1.0, 1.0)),
+            Physical((1.0, 1.0, 1.0)),
             1.0,
         )
     )
@@ -132,7 +125,9 @@ class ContinousStructure:
     coordinates_system: int = 0
     lines: dict[Axes, Line] = field(default_factory=dict)
     background_material: Material = field(
-        default_factory=lambda: Material("BackgroundMaterial", 1.0, 1.0)
+        default_factory=lambda: Material(
+            "BackgroundMaterial", Physical(1.0), Physical(1.0)
+        )
     )
     properties: list[Property] = field(default_factory=list)
 
@@ -161,7 +156,13 @@ class ContinousStructure:
             kind,
             fillcolor,
             edgecolor,
-            material=Material("Property", eps, mu, kappa, sigma),
+            material=Material(
+                "Property",
+                Physical(eps),
+                Physical(mu),
+                Physical((kappa, 0, 0)),
+                Physical((sigma, 0, 0)),
+            ),
         )
         self.properties.append(prop)
 
