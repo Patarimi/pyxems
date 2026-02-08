@@ -46,8 +46,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y nix
-        nix-channel add nixpkgs https://nixos.org/channels/nixpkgs-unstable
-        nix-channel update
+        nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+        nix-channel --update
         nix-env -iA nixpkgs.openems
     - name: Install uv
       uses: astral-sh/setup-uv@v7
