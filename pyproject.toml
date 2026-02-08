@@ -24,7 +24,7 @@ sequence = [
     {cmd = "uv sync --all-groups --all-extras"},
     {cmd = "uvx ruff format"},
     {cmd = "uvx ruff check"},
-    {cmd = "pytest"},
+    {cmd = "pytest --basetemp=tmp"},
 ]
 
 

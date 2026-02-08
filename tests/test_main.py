@@ -1,5 +1,6 @@
 from pathlib import Path
 from pyxems.main import PyXEMSConfig, write_openEMS_xml
+from pyxems.csx import Color
 import logging
 
 
@@ -157,5 +158,41 @@ def test_generate_simp_patch(tmp_path: Path):
         100,
     ):
         oems_config.csx.add_line("Z", k)
+    oems_config.csx.add_property(
+        "Metal", "patch", Color(41, 35, 190), Color(41, 35, 190, 255)
+    )
+    oems_config.csx.add_box(
+        start=(-16, -20, 1.524),
+        stop=(16, 20, 1.524),
+        priority=10,
+        property_id=0,
+    )
+    oems_config.csx.add_property(
+        "Material",
+        "substrate",
+        Color(132, 225, 108, 123),
+        Color(132, 225, 108, 123),
+        eps=3.38,
+        kappa=4.606928e-4,
+    )
+    oems_config.csx.add_box(
+        start=(-30, -30, 0),
+        stop=(30, 30, 1.524),
+        priority=0,
+        property_id=1,
+    )
+    oems_config.csx.add_property(
+        "Metal",
+        "gnd",
+        Color(214, 174, 82),
+        Color(214, 174, 82),
+        eps=1.0,
+    )
+    oems_config.csx.add_box(
+        start=(-30, -30, 0),
+        stop=(30, 30, 0),
+        priority=10,
+        property_id=2,
+    )
     write_openEMS_xml(tmp_path / "openEMS_config.xml", oems_config)
     assert (tmp_path / "openEMS_config.xml").read_text() == ref.read_text()
