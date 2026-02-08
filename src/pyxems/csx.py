@@ -23,12 +23,13 @@ class Physical:
     def __post_init__(self):
         if isinstance(self.value, float):
             self.value = (self.value, 1.0, 1.0)
-    
+
     def __str__(self, short=True) -> str:
         if short:
             return f"{self.value[0]:g}"
         else:
             return ",".join([f"{v:e}" for v in self.value])
+
 
 @dataclass()
 class Material:
@@ -48,7 +49,7 @@ class Material:
             self.kappa = Physical((self.kappa, 0, 0))
         if isinstance(self.sigma, float):
             self.sigma = Physical((self.sigma, 0, 0))
-        
+
     def to_xml(self, short=True) -> str:
         if short:
             return f'<{self.name} Epsilon="{self.epsilon_r}" Mue="{self.mu_r}" Kappa="{self.kappa}" Sigma="{self.sigma}" />'
@@ -97,7 +98,16 @@ class Property:
     fillcolor: Color = field(default_factory=lambda: Color(255, 255, 255, 255))
     edgecolor: Color = field(default_factory=lambda: Color(0, 0, 0, 255))
     material: Material = field(default_factory=lambda: Material("Property", 1.0, 1.0))
-    weight: Material = field(default_factory=lambda: Material("Weight", 1., 1., Physical([1., 1., 1.]), Physical([1., 1., 1.]), 1.))
+    weight: Material = field(
+        default_factory=lambda: Material(
+            "Weight",
+            1.0,
+            1.0,
+            Physical([1.0, 1.0, 1.0]),
+            Physical([1.0, 1.0, 1.0]),
+            1.0,
+        )
+    )
     _primitive: list[Primitive] = field(default_factory=list)
 
     def to_xml(self) -> str:
