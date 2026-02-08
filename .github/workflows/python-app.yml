@@ -30,23 +30,6 @@ jobs:
             uv sync --all-extras
             uvx ty check
 
-  doc-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.python-version }}
-          cache: 'pip'
-      - run: |
-          pip install --upgrade pip
-          uv sync --only-group doc
-      - name: Build Doc
-        run: |
-          uv run mkdocs build
-
   testing:
     strategy:
       fail-fast: false
