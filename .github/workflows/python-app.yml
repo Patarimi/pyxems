@@ -58,7 +58,7 @@ jobs:
         uv sync --group dev
     - name: Test with Pytest
       run: |
-        uv run poe test -rxXs
+        uv run pytest -rxXs
     - name: Store reports
       if: failure()
       uses: actions/upload-artifact@v6
