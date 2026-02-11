@@ -193,5 +193,12 @@ def test_generate_simp_patch(tmp_path: Path):
         priority=10,
         property_id=2,
     )
+    oems_config.csx.add_property("LumpedElement", "port_resist_1", Color(144, 73, 241))
+    oems_config.csx.add_box(
+        start=(-6, 0, 0),
+        stop=(-6, 0, 1.524),
+        priority=5,
+        property_id=3,
+    )
     write_openEMS_xml(tmp_path / "openEMS_config.xml", oems_config)
     assert (tmp_path / "openEMS_config.xml").read_text() == ref.read_text()
