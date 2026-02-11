@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Literal, get_args, Protocol
+from typing import Literal, get_args, Protocol, Optional
 
 Axes = Literal["X", "Y", "Z"]
 
@@ -34,7 +34,7 @@ class Physical:
 
 
 @dataclass()
-class Material:
+class MaterialProperty:
     name: str
     epsilon_r: Physical
     mu_r: Physical
@@ -47,6 +47,22 @@ class Material:
             return f'<{self.name} Epsilon="{self.epsilon_r}" Mue="{self.mu_r}" Kappa="{self.kappa}" Sigma="{self.sigma}" />'
         else:
             return f'<{self.name} Epsilon="{self.epsilon_r.__str__(short=False)}" Mue="{self.mu_r.__str__(short=False)}" Kappa="{self.kappa.__str__(short=False)}" Sigma="{self.sigma.__str__(short=False)}" Density="{self.density:e}" />'
+
+
+@dataclass
+class LumpedProperty:
+    direction: Optional[Axes] = "Z"
+    caps: int = 1
+    resistance: float = 50
+    capacitance: float = 0
+    inductance: float = 0
+    letype: int = 0
+
+    def to_xml(self, short=True) -> str:
+        axe_number = {"X": 0, "Y": 1, "Z": 2}
+        cap = self.capacitance if self.capacitance != 0 else "-nan(ind)"
+        ind = self.inductance if self.inductance != 0 else "-nan(ind)"
+        return f' Direction="{axe_number[self.direction]}" Caps="{self.caps}" R="{self.resistance:e}" C="{cap}" L="{ind}" LEtype="{self.letype:e}"'
 
 
 @dataclass(frozen=True)
@@ -81,18 +97,25 @@ class Box(Primitive):
         return xml
 
 
+PropertyKind = Literal[
+    "Metal", "Material", "LumpedElement", "Excitation", "ProbeBox", "DumpBox"
+]
+
+
 @dataclass(frozen=True)
 class Property:
     name: str
     id: int
-    kind: Literal["Metal", "Material"] = "Material"
+    kind: PropertyKind = "Material"
     fillcolor: Color = field(default_factory=lambda: Color(255, 255, 255, 255))
     edgecolor: Color = field(default_factory=lambda: Color(0, 0, 0, 255))
-    material: Material = field(
-        default_factory=lambda: Material("Property", Physical(1.0), Physical(1.0))
+    material: MaterialProperty | LumpedProperty = field(
+        default_factory=lambda: MaterialProperty(
+            "Property", Physical(1.0), Physical(1.0)
+        )
     )
-    weight: Material = field(
-        default_factory=lambda: Material(
+    weight: MaterialProperty = field(
+        default_factory=lambda: MaterialProperty(
             "Weight",
             Physical(1.0),
             Physical(1.0),
@@ -104,7 +127,13 @@ class Property:
     _primitive: list[Primitive] = field(default_factory=list)
 
     def to_xml(self) -> str:
-        iso = ' Isotropy="1"' if self.kind == "Material" else ""
+        match self.kind:
+            case "Metal":
+                iso = ""
+            case "Material":
+                iso = ' Isotropy="1"'
+            case "LumpedElement":
+                iso = self.material.to_xml()
         xml = f'<{self.kind} ID="{self.id}" Name="{self.name}"{iso}>\n'
         xml += f"    <FillColor {self.fillcolor.to_xml()} />\n"
         xml += f"    <EdgeColor {self.edgecolor.to_xml()} />\n"
@@ -124,8 +153,8 @@ class Property:
 class ContinousStructure:
     coordinates_system: int = 0
     lines: dict[Axes, Line] = field(default_factory=dict)
-    background_material: Material = field(
-        default_factory=lambda: Material(
+    background_material: MaterialProperty = field(
+        default_factory=lambda: MaterialProperty(
             "BackgroundMaterial", Physical(1.0), Physical(1.0)
         )
     )
@@ -140,29 +169,33 @@ class ContinousStructure:
 
     def add_property(
         self,
-        kind: Literal["Metal", "Material"],
+        kind: PropertyKind,
         name: str,
         fillcolor: Color = Color(255, 255, 255, 255),
-        edgecolor: Color = Color(0, 0, 0, 255),
+        edgecolor: Optional[Color] = None,
         eps: float = 1.0,
         mu: float = 1.0,
         kappa: float = 0.0,
         sigma: float = 0.0,
     ):
         id = len(self.properties)
-        prop = Property(
-            name,
-            id,
-            kind,
-            fillcolor,
-            edgecolor,
-            material=Material(
+        if kind in ("Material", "Metal"):
+            property = MaterialProperty(
                 "Property",
                 Physical(eps),
                 Physical(mu),
                 Physical((kappa, 0, 0)),
                 Physical((sigma, 0, 0)),
-            ),
+            )
+        else:
+            property = LumpedProperty()
+        prop = Property(
+            name,
+            id,
+            kind,
+            fillcolor,
+            edgecolor if edgecolor is not None else fillcolor,
+            material=property,
         )
         self.properties.append(prop)
 
