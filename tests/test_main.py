@@ -172,8 +172,7 @@ def test_generate_simp_patch(tmp_path: Path):
         "substrate",
         Color(132, 225, 108, 123),
         Color(132, 225, 108, 123),
-        eps=3.38,
-        kappa=4.606928e-4,
+        {"eps": 3.38, "kappa": 4.606928e-4},
     )
     oems_config.csx.add_box(
         start=(-30, -30, 0),
@@ -199,6 +198,32 @@ def test_generate_simp_patch(tmp_path: Path):
         stop=(-6, 0, 1.524),
         priority=5,
         property_id=3,
+    )
+    oems_config.csx.add_property("Excitation", "port_excite_1", Color(241, 187, 233))
+    oems_config.csx.add_box(
+        start=(-6, 0, 0),
+        stop=(-6, 0, 1.524),
+        priority=5,
+        property_id=4,
+    )
+    oems_config.csx.add_property("ProbeBox", "port_ut_1", Color(235, 179, 166))
+    oems_config.csx.add_box(
+        start=(-6, 0, 0),
+        stop=(-6, 0, 1.524),
+        priority=0,
+        property_id=5,
+    )
+    oems_config.csx.add_property(
+        "ProbeBox",
+        "port_it_1",
+        Color(219, 60, 135),
+        prop_conf={"type": 1, "normdir": 2, "weight": 1},
+    )
+    oems_config.csx.add_box(
+        start=(-6, 0, 0.762),
+        stop=(-6, 0, 0.762),
+        priority=0,
+        property_id=6,
     )
     write_openEMS_xml(tmp_path / "openEMS_config.xml", oems_config)
     assert (tmp_path / "openEMS_config.xml").read_text() == ref.read_text()
