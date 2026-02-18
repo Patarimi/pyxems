@@ -220,8 +220,8 @@ def test_generate_simp_patch(tmp_path: Path):
         prop_conf={"type": 1, "normdir": 2, "weight": 1},
     )
     oems_config.csx.add_box(
-        start=(-6, 0, 0),
-        stop=(-6, 0, 1.524),
+        start=(-6, 0, 0.762),
+        stop=(-6, 0, 0.762),
         priority=0,
         property_id=6,
     )

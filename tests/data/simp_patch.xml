@@ -76,7 +76,7 @@
                 </Box>
             </Primitives>
         </ProbeBox>
-        <ProbeBox ID="6" Name="port_it_1" Number="0" NormDir="2" Type="1" Weight="1" StartTime="0" StopTime="0">
+        <ProbeBox ID="6" Name="port_it_1" Number="0" Type="1" Weight="1" NormDir="2" StartTime="0" StopTime="0">
             <FillColor R="219" G="60" B="135" a="255" />
             <EdgeColor R="219" G="60" B="135" a="255" />
             <Primitives>

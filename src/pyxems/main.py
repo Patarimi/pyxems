@@ -14,7 +14,7 @@ class PyXEMSConfig:
         xml = "<openEMS>\n"
         xml += self.fdtd.to_xml()
         xml += self.csx.to_xml()
-        xml += "</openEMS>"
+        xml += "</openEMS>\n"
         return xml
 
 
