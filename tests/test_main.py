@@ -225,5 +225,63 @@ def test_generate_simp_patch(tmp_path: Path):
         priority=0,
         property_id=6,
     )
+    oems_config.csx.add_property("DumpBox", "nf2ff_E", Color(12, 62, 153))
+    start = (-90.50519, -90.66667, -40.34557)
+    stop = (-90.50519, 90.66667, 90.32554)
+    oems_config.csx.add_box(start, stop, priority=0, property_id=7)
+    oems_config.csx.add_box(
+        (-start[0], *start[1:]), (-stop[0], *stop[1:]), priority=0, property_id=7
+    )
+    oems_config.csx.add_box(
+        start, (-stop[0], -stop[1], stop[2]), priority=0, property_id=7
+    )
+    oems_config.csx.add_box(
+        (start[0], -start[1], start[2]),
+        (-stop[0], stop[1], stop[2]),
+        priority=0,
+        property_id=7,
+    )
+    oems_config.csx.add_box(
+        (start[0], start[1], start[2]),
+        (-stop[0], stop[1], start[2]),
+        priority=0,
+        property_id=7,
+    )
+    oems_config.csx.add_box(
+        (start[0], start[1], stop[2]),
+        (-stop[0], stop[1], stop[2]),
+        priority=0,
+        property_id=7,
+    )
+    oems_config.csx.add_property(
+        "DumpBox", "nf2ff_H", Color(36, 94, 13), prop_conf={"dumptype": 1}
+    )
+    start = (-90.50519, -90.66667, -40.34557)
+    stop = (-90.50519, 90.66667, 90.32554)
+    oems_config.csx.add_box(start, stop, priority=0, property_id=8)
+    oems_config.csx.add_box(
+        (-start[0], *start[1:]), (-stop[0], *stop[1:]), priority=0, property_id=8
+    )
+    oems_config.csx.add_box(
+        start, (-stop[0], -stop[1], stop[2]), priority=0, property_id=8
+    )
+    oems_config.csx.add_box(
+        (start[0], -start[1], start[2]),
+        (-stop[0], stop[1], stop[2]),
+        priority=0,
+        property_id=8,
+    )
+    oems_config.csx.add_box(
+        (start[0], start[1], start[2]),
+        (-stop[0], stop[1], start[2]),
+        priority=0,
+        property_id=8,
+    )
+    oems_config.csx.add_box(
+        (start[0], start[1], stop[2]),
+        (-stop[0], stop[1], stop[2]),
+        priority=0,
+        property_id=8,
+    )
     write_openEMS_xml(tmp_path / "openEMS_config.xml", oems_config)
     assert (tmp_path / "openEMS_config.xml").read_text() == ref.read_text()
