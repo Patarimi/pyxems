@@ -49,7 +49,7 @@ class MaterialProperty:
             return f'<{self.name} Epsilon="{self.epsilon_r.__str__(short=False)}" Mue="{self.mu_r.__str__(short=False)}" Kappa="{self.kappa.__str__(short=False)}" Sigma="{self.sigma.__str__(short=False)}" Density="{self.density:e}" />'
 
 
-@dataclass
+@dataclass(frozen=True)
 class LumpedProperty:
     direction: Optional[Axes] = "Z"
     caps: int = 1
@@ -63,6 +63,33 @@ class LumpedProperty:
         cap = self.capacitance if self.capacitance != 0 else "-nan(ind)"
         ind = self.inductance if self.inductance != 0 else "-nan(ind)"
         return f' Direction="{axe_number[self.direction]}" Caps="{self.caps}" R="{self.resistance:e}" C="{cap}" L="{ind}" LEtype="{self.letype:e}"'
+
+
+@dataclass(frozen=True)
+class ExcitationProperty:
+    number: int = 0
+    enable: int = 1
+    frequency: float = 0.0
+    delay: float = 0
+    type = 0
+    excite: tuple[float, float, float] = (0.0, 0.0, -1.0)
+    propdir: tuple[float, float, float] = (0.0, 0.0, 0.0)
+
+    def to_xml(self, short=True) -> str:
+        return f' Number="{self.number}" Enabled="{self.enable}" Frequency="{self.frequency:e}" Delay="{self.delay:e}" Type="{self.type}" Excite="{",".join([f"{v:e}" for v in self.excite])}" PropDir="{",".join([f"{v:e}" for v in self.propdir])}"'
+
+
+@dataclass(frozen=True)
+class ProbeBoxProperty:
+    number: int = 0
+    type: int = 0
+    weight: int = -1
+    normdir: int = -1
+    starttime: float = 0
+    stoptime: float = 0
+
+    def to_xml(self, short=True) -> str:
+        return f' Number="{self.number}" Type="{self.type}" Weight="{self.weight}" NormDir="{self.normdir}" StartTime="{self.starttime:g}" StopTime="{self.stoptime:g}"'
 
 
 @dataclass(frozen=True)
@@ -109,7 +136,9 @@ class Property:
     kind: PropertyKind = "Material"
     fillcolor: Color = field(default_factory=lambda: Color(255, 255, 255, 255))
     edgecolor: Color = field(default_factory=lambda: Color(0, 0, 0, 255))
-    material: MaterialProperty | LumpedProperty = field(
+    material: (
+        MaterialProperty | LumpedProperty | ExcitationProperty | ProbeBoxProperty
+    ) = field(
         default_factory=lambda: MaterialProperty(
             "Property", Physical(1.0), Physical(1.0)
         )
@@ -134,6 +163,12 @@ class Property:
                 iso = ' Isotropy="1"'
             case "LumpedElement":
                 iso = self.material.to_xml()
+            case "Excitation":
+                iso = self.material.to_xml()
+            case "ProbeBox":
+                iso = self.material.to_xml()
+            case _:
+                iso = ""
         xml = f'<{self.kind} ID="{self.id}" Name="{self.name}"{iso}>\n'
         xml += f"    <FillColor {self.fillcolor.to_xml()} />\n"
         xml += f"    <EdgeColor {self.edgecolor.to_xml()} />\n"
@@ -145,6 +180,8 @@ class Property:
         if self.kind == "Material":
             xml += f"    {self.material.to_xml(False)}\n"
             xml += f"    {self.weight.to_xml(False)}\n"
+        if self.kind == "Excitation":
+            xml += '    <Weight X="1.000000e+00" Y="1.000000e+00" Z="1.000000e+00" />\n'
         xml += f"</{self.kind}>\n"
         return xml
 
@@ -173,22 +210,39 @@ class ContinousStructure:
         name: str,
         fillcolor: Color = Color(255, 255, 255, 255),
         edgecolor: Optional[Color] = None,
-        eps: float = 1.0,
-        mu: float = 1.0,
-        kappa: float = 0.0,
-        sigma: float = 0.0,
+        prop_conf: Optional[dict[str, float | int]] = None,
     ):
         id = len(self.properties)
-        if kind in ("Material", "Metal"):
-            property = MaterialProperty(
-                "Property",
-                Physical(eps),
-                Physical(mu),
-                Physical((kappa, 0, 0)),
-                Physical((sigma, 0, 0)),
-            )
-        else:
-            property = LumpedProperty()
+        if prop_conf is None:
+            prop_conf = {}
+        match kind:
+            case "Material" | "Metal":
+                property = MaterialProperty(
+                    "Property",
+                    Physical(prop_conf["eps"] if "eps" in prop_conf else 1.0),
+                    Physical(prop_conf["mu"] if "mu" in prop_conf else 1.0),
+                    Physical(
+                        (prop_conf["kappa"] if "kappa" in prop_conf else 0.0, 0, 0)
+                    ),
+                    Physical(
+                        (prop_conf["sigma"] if "sigma" in prop_conf else 0.0, 0, 0)
+                    ),
+                )
+            case "LumpedElement":
+                property = LumpedProperty()
+            case "Excitation":
+                property = ExcitationProperty()
+            case "ProbeBox":
+                property = ProbeBoxProperty(
+                    number=int(prop_conf["number"] if "number" in prop_conf else 0),
+                    type=int(prop_conf["type"] if "type" in prop_conf else 0),
+                    weight=int(prop_conf["weight"] if "weight" in prop_conf else -1),
+                    normdir=int(prop_conf["normdir"] if "normdir" in prop_conf else -1),
+                    starttime=prop_conf["starttime"] if "starttime" in prop_conf else 0,
+                    stoptime=prop_conf["stoptime"] if "stoptime" in prop_conf else 0,
+                )
+            case _:
+                raise ValueError(f"Unknown property kind: {kind}")
         prop = Property(
             name,
             id,
