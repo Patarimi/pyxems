@@ -93,6 +93,23 @@ class ProbeBoxProperty:
 
 
 @dataclass(frozen=True)
+class DumpBoxProperty:
+    number: int = 0
+    type: int = 0
+    weight: int = 1
+    normdir: int = -1
+    starttime: float = 0
+    stoptime: float = 0
+    dumptype: int = 0
+    dumpmode: int = 1
+    filetype: int = 1
+    multigridlevel: int = 0
+
+    def to_xml(self, short=True) -> str:
+        return f' Number="{self.number}" Type="{self.type}" Weight="{self.weight}" NormDir="{self.normdir}" StartTime="{self.starttime:g}" StopTime="{self.stoptime:g}" DumpType="{self.dumptype}" DumpMode="{self.dumpmode}" FileType="{self.filetype}" MultiGridLevel="{self.multigridlevel}"'
+
+
+@dataclass(frozen=True)
 class Color:
     r: int
     g: int
@@ -137,7 +154,11 @@ class Property:
     fillcolor: Color = field(default_factory=lambda: Color(255, 255, 255, 255))
     edgecolor: Color = field(default_factory=lambda: Color(0, 0, 0, 255))
     material: (
-        MaterialProperty | LumpedProperty | ExcitationProperty | ProbeBoxProperty
+        MaterialProperty
+        | LumpedProperty
+        | ExcitationProperty
+        | ProbeBoxProperty
+        | DumpBoxProperty
     ) = field(
         default_factory=lambda: MaterialProperty(
             "Property", Physical(1.0), Physical(1.0)
@@ -157,15 +178,9 @@ class Property:
 
     def to_xml(self) -> str:
         match self.kind:
-            case "Metal":
-                iso = ""
             case "Material":
                 iso = ' Isotropy="1"'
-            case "LumpedElement":
-                iso = self.material.to_xml()
-            case "Excitation":
-                iso = self.material.to_xml()
-            case "ProbeBox":
+            case "LumpedElement" | "ProbeBox" | "Excitation" | "DumpBox":
                 iso = self.material.to_xml()
             case _:
                 iso = ""
@@ -240,6 +255,12 @@ class ContinousStructure:
                     normdir=int(prop_conf["normdir"] if "normdir" in prop_conf else -1),
                     starttime=prop_conf["starttime"] if "starttime" in prop_conf else 0,
                     stoptime=prop_conf["stoptime"] if "stoptime" in prop_conf else 0,
+                )
+            case "DumpBox":
+                property = DumpBoxProperty(
+                    dumptype=int(
+                        prop_conf["dumptype"] if "dumptype" in prop_conf else 0
+                    ),
                 )
             case _:
                 raise ValueError(f"Unknown property kind: {kind}")
