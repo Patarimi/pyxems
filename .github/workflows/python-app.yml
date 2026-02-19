@@ -46,7 +46,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y nix
-        echo $PATH
+        ls -la ~/.nix-profile/bin
+        export PATH="~/.nix-profile/bin:$PATH"
         sudo nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
         sudo nix-channel --update
         sudo nix-env -iA nixpkgs.openems
