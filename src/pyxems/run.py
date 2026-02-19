@@ -47,7 +47,7 @@ def find_openems_executable() -> Optional[Path]:
 def check_config() -> bool:
     """
     Check if the OpenEMS executable is available.
-    
+
     Returns:
         bool: True if the OpenEMS executable is found, False otherwise.
     """
