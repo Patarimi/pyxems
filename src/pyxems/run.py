@@ -19,6 +19,11 @@ app = cyclopts.App(__name__)
 
 
 def find_openems_executable() -> Optional[Path]:
+    """
+    Find the OpenEMS executable by checking the system PATH and the OPENEMS_PATH environment variable.
+    Returns:
+        Optional[Path]: The path to the OpenEMS executable if found, otherwise None.
+    """
     if which("openEMS") is not None:
         logging.info(f"Found OpenEMS executable in PATH: {which('openEMS')}")
         return Path(which("openEMS"))  # type: ignore
@@ -40,12 +45,21 @@ def find_openems_executable() -> Optional[Path]:
 
 
 def check_config() -> bool:
+    """
+    Check if the OpenEMS executable is available.
+    
+    Returns:
+        bool: True if the OpenEMS executable is found, False otherwise.
+    """
     openems_executable = find_openems_executable()
     return openems_executable is not None
 
 
 @app.command()
 def simulate(config_path: Path, run_dir: Optional[Path]) -> CompletedProcess:
+    """
+    Run an OpenEMS simulation using the specified configuration file and optional run directory.
+    """
     openems_path = find_openems_executable()
     if openems_path is None:
         raise FileNotFoundError(
