@@ -46,11 +46,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y nix
-        ls -la ~/.nix-profile/bin
-        export PATH="~/.nix-profile/bin:$PATH"
+        export PATH="/root/.nix-profile/bin:$PATH"
+        ls -la /root/.nix-profile/bin
         sudo nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
         sudo nix-channel --update
-        sudo nix-env -iA nixpkgs.openems
+        sudo nix-env -iA nixpkgs.openems -v 2
         which openEMS
     - name: Install uv
       uses: astral-sh/setup-uv@v7
