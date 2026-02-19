@@ -29,6 +29,18 @@ jobs:
         run: |
             uv sync --all-extras
             uvx ty check
+  
+  doc-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Build Doc
+        run: |
+          uv sync --all-extras --group doc
+          uv run mkdocs build
+
 
   testing:
     strategy:
@@ -37,7 +49,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
-    needs: [check-format]
+    needs: [check-format, doc-test]
 
     steps:
     - uses: actions/checkout@v6
