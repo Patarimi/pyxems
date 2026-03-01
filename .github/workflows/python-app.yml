@@ -61,7 +61,7 @@ jobs:
       if: ${{runner.os != 'Windows' }}
       run: |
         nix-channel --list
-        nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+        nix-channel --add https://nixos.org/channels/nixpkgs-25.11 nixpkgs
         nix-channel --update
         nix-env -iA nixpkgs.openems
         which openEMS
